@@ -65,7 +65,7 @@ public class ExcelGenerator<T> {
 
     private void autosize(){
         IntStream
-            .range(0, tClass.getFields().length)
+            .range(0, tClass.getDeclaredFields().length)
             .forEach(sheet::autoSizeColumn);
     }
 
@@ -146,7 +146,6 @@ public class ExcelGenerator<T> {
                             e.printStackTrace();
                         }
                     });
-
 
         }
     }
