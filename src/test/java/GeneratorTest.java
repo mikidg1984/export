@@ -1,5 +1,6 @@
 import it.mdg.export.ExcelGenerator;
 import it.mdg.export.annotation.ExcelColumn;
+import it.mdg.export.annotation.ExcelIgnore;
 import it.mdg.export.annotation.ExcelSheet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,7 @@ public class GeneratorTest {
         @ExcelColumn(name = "Colonna 1")
         Long column1;
 
+        @ExcelIgnore
         String notAnnotatedCol;
 
         @ExcelColumn(name = "Vero/Falso")
