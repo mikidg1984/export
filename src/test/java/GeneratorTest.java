@@ -1,11 +1,16 @@
 import it.mdg.export.ExcelGenerator;
 import it.mdg.export.annotation.ExcelColumn;
+import it.mdg.export.annotation.ExcelFormat;
 import it.mdg.export.annotation.ExcelIgnore;
 import it.mdg.export.annotation.ExcelSheet;
+import it.mdg.export.formatter.LocalDateFormatter;
+import it.mdg.export.formatter.LocalDateTimeFormatter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -20,11 +25,14 @@ public class GeneratorTest {
     @Test
     public void generate() throws IOException, IllegalAccessException {
 
+        LocalDate date = LocalDate.now();
+        LocalDateTime datetime = LocalDateTime.now();
+
         List<SimpleType> dataList = List.of(
-                new SimpleType().setColumn1(1L).setNotAnnotatedCol("Testo").setBoolCol(true),
+                new SimpleType().setColumn1(1L).setNotAnnotatedCol("Testo").setBoolCol(true).setData(date).setDatetime(datetime),
                 new SimpleType().setColumn1(2L).setNotAnnotatedCol("Testo2").setBoolCol(true),
                 new SimpleType().setColumn1(3L).setNotAnnotatedCol("Testo3").setBoolCol(false),
-                new SimpleType().setColumn1(4L).setNotAnnotatedCol("Testo4").setBoolCol(true),
+                new SimpleType().setColumn1(4L).setNotAnnotatedCol("Testo4").setBoolCol(true).setData(date).setDatetime(datetime),
                 new SimpleType().setColumn1(5L).setNotAnnotatedCol("Testo5").setBoolCol(false)
         );
 
@@ -50,6 +58,12 @@ public class GeneratorTest {
 
         @ExcelColumn(name = "Vero/Falso")
         Boolean boolCol;
+
+        @ExcelFormat(formatter = LocalDateFormatter.class)
+        LocalDate data;
+
+        @ExcelFormat(formatter = LocalDateTimeFormatter.class)
+        LocalDateTime datetime;
 
         public SimpleType() {
         }
@@ -78,6 +92,24 @@ public class GeneratorTest {
 
         public SimpleType setBoolCol(Boolean boolCol) {
             this.boolCol = boolCol;
+            return this;
+        }
+
+        public LocalDate getData() {
+            return data;
+        }
+
+        public SimpleType setData(LocalDate data) {
+            this.data = data;
+            return this;
+        }
+
+        public LocalDateTime getDatetime() {
+            return datetime;
+        }
+
+        public SimpleType setDatetime(LocalDateTime datetime) {
+            this.datetime = datetime;
             return this;
         }
     }

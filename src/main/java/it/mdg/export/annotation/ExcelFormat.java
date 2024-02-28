@@ -2,13 +2,13 @@ package it.mdg.export.annotation;
 
 import it.mdg.export.formatter.FieldFormatter;
 
-import java.lang.annotation.Retention;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Class ExcelColumn
+ * Class ExcelFormat
  *
  * @author Michele Del Giudice <michele.delgiudice@doriansrl.it>
  * @created 27 February 2024 - 22:57
@@ -16,6 +16,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ExcelColumn {
-    String name() default "";
+public @interface ExcelFormat {
+    Class<? extends FieldFormatter> formatter() default FieldFormatter.None.class;
 }

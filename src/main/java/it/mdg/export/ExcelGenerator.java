@@ -1,8 +1,10 @@
 package it.mdg.export;
 
 import it.mdg.export.annotation.ExcelColumn;
+import it.mdg.export.annotation.ExcelFormat;
 import it.mdg.export.annotation.ExcelIgnore;
 import it.mdg.export.annotation.ExcelSheet;
+import it.mdg.export.formatter.FieldFormatter;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -12,7 +14,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -65,6 +71,22 @@ public class ExcelGenerator<T> {
 
     private Predicate<Field> notIgnored = field -> field.getAnnotation(ExcelIgnore.class) == null;
 
+    private Object format(Field field,T record) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, InstantiationException {
+
+        ExcelFormat excelFormat = field.getAnnotation(ExcelFormat.class);
+
+        if(excelFormat == null){
+            return field.get(record);
+        }
+
+        Class<? extends FieldFormatter> formatterClass = excelFormat.formatter();
+
+        if(!formatterClass.getCanonicalName().equals(FieldFormatter.None.CANONICAL_NAME)){
+            return formatterClass.getConstructor().newInstance().format(field.get(record));
+        }
+
+        return field.get(record);
+    }
     private void writeHeader() {
         sheet = workbook.createSheet(sheetName());
         Row row = sheet.createRow(0);
@@ -89,10 +111,14 @@ public class ExcelGenerator<T> {
             cell.setCellValue((Integer) valueOfCell);
         } else if (valueOfCell instanceof Long) {
             cell.setCellValue((Long) valueOfCell);
-        } else if (valueOfCell instanceof String) {
-            cell.setCellValue((String) valueOfCell);
-        } else {
+        } else if (valueOfCell instanceof Boolean) {
             cell.setCellValue((Boolean) valueOfCell);
+        }else if (valueOfCell instanceof LocalDateTime) {
+            cell.setCellValue((LocalDateTime) valueOfCell);
+        }else if (valueOfCell instanceof LocalDate) {
+            cell.setCellValue((LocalDate) valueOfCell);
+        } else {
+            cell.setCellValue(String.valueOf(valueOfCell));
         }
         cell.setCellStyle(style);
     }
@@ -111,9 +137,13 @@ public class ExcelGenerator<T> {
                     .peek(f->f.setAccessible(true))
                     .forEach(field -> {
                         try {
-                            createCell(row, ai.getAndIncrement(), field.get(record), style);
-                        } catch (IllegalAccessException e) {
 
+                            Object data = format(field,record);
+
+                            createCell(row, ai.getAndIncrement(),data, style);
+                        } catch (Exception e) {
+                            System.err.println(e.getMessage());
+                            e.printStackTrace();
                         }
                     });
 
